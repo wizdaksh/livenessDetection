@@ -1,63 +1,78 @@
-# 👁️‍🗨️ Liveness Detection
+# Liveness Detection
 
 A computer vision system to detect real human presence and prevent spoofing attacks using photos, videos, and deepfakes.
 
 ---
 
-## 🔍 Overview
+## Overview
 
 This project implements **liveness detection** techniques to distinguish between real faces and spoofed ones, such as:
 
-- 📸 Printed photographs
-- 📹 Video replays
-- 🤖 Deepfake manipulations
+- Printed photographs
+- Video replays
+- Deepfake manipulations
 
 It's designed to enhance security in face authentication systems.
 
 ---
 
-## 🧠 Methods Used
+## Methods Used
 
-- 🎯 **Optical Flow** – Tracks motion to detect inconsistencies in fake media.
-- 🧍 **Google MediaPipe** – Face mesh tracking to analyze facial landmarks.
-- 👁️ **DLib Blink Detection** – Identifies natural blinking patterns as a sign of life.
+- **Optical Flow** – Tracks motion to detect inconsistencies in fake media.
+- **Google MediaPipe** – Face mesh tracking to analyze facial landmarks.
+- **DLib Blink Detection** – Identifies natural blinking patterns as a sign of life.
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
-## Windows
+### Windows
 
-# Open bash
+#### Open bash
+```bash
 Enter command below in bash terminal
+```
 
-# Create a virtual environment
+##### Create a virtual environment
+```bash
 python -m venv myenv
+```
 
-# Activate the environment
+##### Activate the environment
+```bash
 myenv\Scripts\activate
+```
 
-# Install dependencies
+##### Install dependencies
+```bash
 pip install -r requirements.txt
+```
 --
-macOS/Linux
 
-# Create a virtual environment
+### macOS/Linux
+
+##### Create a virtual environment
+```bash
 python3 -m venv myenv
+```
 
-# Activate the environment
+##### Activate the environment
+```bash
 source myenv/bin/activate
+```
 
-# Install dependencies
+## Install dependencies
+```bash
 pip install -r requirements.txt
-
+```
 ---
 
 ### 🔄 Clone the repository
 
+```bash
 git clone https://github.com/wizdaksh/livenessDetection
 cd livenessDetection
-
+```
 ---
 
 # Import libraries (if not added)
