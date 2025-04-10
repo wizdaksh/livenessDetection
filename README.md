@@ -29,9 +29,8 @@ It's designed to enhance security in face authentication systems.
 ### Windows
 
 #### Open bash
-```bash
 Enter command below in bash terminal
-```
+
 
 ##### Create a virtual environment
 ```bash
@@ -47,7 +46,7 @@ myenv\Scripts\activate
 ```bash
 pip install -r requirements.txt
 ```
---
+---
 
 ### macOS/Linux
 
@@ -61,6 +60,7 @@ python3 -m venv myenv
 source myenv/bin/activate
 ```
 
+---
 ## Install dependencies
 ```bash
 pip install -r requirements.txt
@@ -76,7 +76,7 @@ cd livenessDetection
 ---
 
 # Import libraries (if not added)
-
+```python
 import cv2
 import dlib
 import numpy as np
@@ -88,4 +88,4 @@ from collections import deque
 import mediapipe as mp 
 from mediapipe.tasks import python 
 from mediapipe.tasks.python import vision
-
+```
