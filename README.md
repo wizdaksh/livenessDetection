@@ -76,7 +76,7 @@ pip install -r requirements.txt
 
 ---
 
-### Import libraries (if not added)
+### Import libraries from dependecies.txt (if not added)
 ```python
 import cv2
 import dlib
@@ -86,7 +86,4 @@ import matplotlib.animation as animation
 from scipy.spatial import distance as dist
 from imutils import face_utils
 from collections import deque
-import mediapipe as mp 
-from mediapipe.tasks import python 
-from mediapipe.tasks.python import vision
 ```
