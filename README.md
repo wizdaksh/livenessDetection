@@ -19,9 +19,8 @@ It's designed to enhance security in face authentication systems.
 ## Methods Used
 
 - **Optical Flow** – Tracks motion to detect inconsistencies in fake media.
-- **Google MediaPipe** – Face mesh tracking to analyze facial landmarks.
 - **DLib Blink Detection** – Identifies natural blinking patterns as a sign of life.
-
+- **68 Face Landmarks** - Returns x,y coordinates for facial landmarks
 ---
 
 ## Getting Started
