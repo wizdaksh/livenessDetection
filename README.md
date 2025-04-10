@@ -46,7 +46,7 @@ myenv\Scripts\activate
 ```bash
 pip install -r requirements.txt
 ```
----
+
 
 ### macOS/Linux
 
