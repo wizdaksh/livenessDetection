@@ -61,11 +61,6 @@ source myenv/bin/activate
 ```
 
 ---
-## Install dependencies
-```bash
-pip install -r requirements.txt
-```
----
 
 ### 🔄 Clone the repository
 
@@ -75,7 +70,14 @@ cd livenessDetection
 ```
 ---
 
-# Import libraries (if not added)
+### Install dependencies
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+### Import libraries (if not added)
 ```python
 import cv2
 import dlib
