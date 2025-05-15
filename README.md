@@ -1,29 +1,30 @@
 # Liveness Detection
 
-A computer vision system to detect real human presence and prevent spoofing attacks using photos, videos, and deepfakes.
+A real-time computer vision system that detects human liveness using **facial landmarks**, **eye blink detection**, and **mouth expression velocity**. Built with Google’s MediaPipe Tasks API and visualized with matplotlib.
 
 ---
 
-## Overview
+## 🧠 Features
 
-This project implements **liveness detection** techniques to distinguish between real faces and spoofed ones, such as:
-
-- Printed photographs
-- Video replays
-- Deepfake manipulations
-
-It's designed to enhance security in face authentication systems.
+- Tracks 478 facial landmarks using `face_landmarker.task`
+- Detects **eye blinks** using vertical eyelid distance
+- Measures **mouth opening and expression velocity**
+- Displays a **live graph** of mouth and eye dynamics
 
 ---
 
-## Methods Used
+## 📦 Methods & Tools
 
-- **Optical Flow** – Tracks motion to detect inconsistencies in fake media.
-- **DLib Blink Detection** – Identifies natural blinking patterns as a sign of life.
-- **68 Face Landmarks** - Returns x,y coordinates for facial landmarks
+- **MediaPipe Tasks API** – high-precision facial landmark model
+- **Matplotlib** – live visualization of tracked facial metrics
+- **OpenCV** – webcam feed and face tracking
+- **NumPy** – geometric calculations
+
 ---
 
-## Getting Started
+## 📂 Project Structure
+
+# Getting Started
 
 ### Windows
 
@@ -78,12 +79,8 @@ pip install -r requirements.txt
 
 ### Import libraries from dependecies.txt (if not added)
 ```python
+import mediapipe as mp 
 import cv2
-import dlib
-import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-from scipy.spatial import distance as dist
-from imutils import face_utils
-from collections import deque
+import numpy as np
 ```
