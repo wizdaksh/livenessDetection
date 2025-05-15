@@ -1,6 +1,4 @@
+mediapipe>=0.10.0
 opencv-python
-dlib
-numpy
 matplotlib
-scipy
-imutils
+numpy
