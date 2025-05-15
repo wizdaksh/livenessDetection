@@ -1,120 +1,106 @@
 import cv2
-import dlib
 import numpy as np
+import mediapipe as mp
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-from scipy.spatial import distance as dist
-from imutils import face_utils
+import threading
 from collections import deque
-import os
+from mediapipe.tasks.python import vision
+from mediapipe.tasks.python import BaseOptions
 
-# Load Dlib's face detector and shape predictor
-detector = dlib.get_frontal_face_detector()
-model_path = os.path.join(os.path.dirname(__file__), 'models', 'shape_predictor_68_face_landmarks.dat')
-predictor = dlib.shape_predictor(model_path)
+# Load MediaPipe model
+model_path = r"C:\Users\daksh\Documents\Projects\Authentication\src\models\face_landmarker.task"
+options = vision.FaceLandmarkerOptions(
+    base_options=BaseOptions(model_asset_path=model_path),
+    output_face_blendshapes=False,
+    num_faces=1,
+    running_mode=vision.RunningMode.VIDEO
+)
+face_landmarker = vision.FaceLandmarker.create_from_options(options)
 
-# Get landmark indexes for eyes
-(lStart, lEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
-(rStart, rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
+# Shared data buffers
+max_len = 100
+mouth_openings = deque(maxlen=max_len)
+mouth_velocities = deque(maxlen=max_len)
+left_eye_dists = deque(maxlen=max_len)
+right_eye_dists = deque(maxlen=max_len)
 
-# EAR Thresholds and Counters
-EAR_THRESHOLD = 0.25
-EAR_CONSEC_FRAMES = 2
-blink_count = 0
-frame_counter = 0
+def live_plot():
+    plt.style.use('ggplot')
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 6))
+    fig.tight_layout(pad=3)
 
-# Store last 100 EAR values for the running graph
-ear_values = deque(maxlen=100)
+    while True:
+        ax1.clear()
+        ax2.clear()
+        ax1.set_title("Mouth Opening & Velocity")
+        ax2.set_title("Eye Distance (Vertical)")
 
-# Function to compute Eye Aspect Ratio (EAR)
-def eye_aspect_ratio(eye):
-    A = dist.euclidean(eye[1], eye[5])
-    B = dist.euclidean(eye[2], eye[4])
-    C = dist.euclidean(eye[0], eye[3])
-    return (A + B) / (2.0 * C)
+        ax1.plot(mouth_openings, label="Mouth Opening")
+        ax1.plot(mouth_velocities, label="Velocity")
+        ax1.legend(loc="upper right")
 
-# Start Video Capture (Webcam)
-camera = cv2.VideoCapture(0)  # 0 for default camera
+        ax2.plot(left_eye_dists, label="Left Eye")
+        ax2.plot(right_eye_dists, label="Right Eye")
+        ax2.legend(loc="upper right")
 
-# Setup Matplotlib Figure for EAR Graph
-fig, ax = plt.subplots()
-x_data = np.arange(0, 100)  # X-axis (last 100 frames)
-y_data = np.zeros(100)      # Y-axis (EAR values)
-line, = ax.plot(x_data, y_data, 'g-', label="EAR")
+        plt.pause(0.05)
 
-# Set Graph Labels
-ax.set_ylim(0, 0.5)
-ax.set_xlim(0, 100)
-ax.set_xlabel("Frames")
-ax.set_ylabel("EAR Value")
-ax.set_title("Eye Aspect Ratio (EAR) Over Time")
-ax.legend()
+# Start plot thread
+plot_thread = threading.Thread(target=live_plot, daemon=True)
+plot_thread.start()
 
-# Function to update the graph in real time
-def update_graph(frame):
-    global blink_count, frame_counter
+# Video processing
+cap = cv2.VideoCapture(0)
+frame_idx = 0
+prev_mouth_opening = None
 
-    ret, img = camera.read()
-    if not ret:
-        return line,
+while True:
+    success, frame = cap.read()
+    if not success:
+        break
 
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    faces = detector(gray)
+    frame = cv2.resize(frame, (640, 480))
+    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_frame)
 
-    ear = 0  # Default EAR value
-    for face in faces:
-        shape = predictor(gray, face)
-        shape = face_utils.shape_to_np(shape)
+    result = face_landmarker.detect_for_video(mp_image, frame_idx * 33)
 
-        left_eye = shape[lStart:lEnd]
-        right_eye = shape[rStart:rEnd]
-        face = shape
+    if result.face_landmarks:
+        ih, iw, _ = frame.shape
+        lm = result.face_landmarks[0]
 
-        left_EAR = eye_aspect_ratio(left_eye)
-        right_EAR = eye_aspect_ratio(right_eye)
-        ear = (left_EAR + right_EAR) / 2.0  # Average EAR
+        def to_xy(idx):
+            return int(lm[idx].x * iw), int(lm[idx].y * ih)
 
-        # Blink detection
-        if ear < EAR_THRESHOLD:
-            frame_counter += 1
-        else:
-            if frame_counter >= EAR_CONSEC_FRAMES:
-                blink_count += 1
-            frame_counter = 0  # Reset counter
+        def dist(idx1, idx2):
+            x1, y1 = to_xy(idx1)
+            x2, y2 = to_xy(idx2)
+            return np.linalg.norm([x1 - x2, y1 - y2])
 
-        # Draw eye landmarks
-        cv2.drawContours(img, [cv2.convexHull(left_eye)], -1, (0, 255, 0), 1)
-        cv2.drawContours(img, [cv2.convexHull(right_eye)], -1, (0, 255, 0), 1)
+        # Mouth
+        top_y = lm[13].y * ih
+        bottom_y = lm[14].y * ih
+        opening = abs(bottom_y - top_y)
+        mouth_openings.append(opening)
 
-        for (x, y ) in shape:
-            cv2.circle(img, (x, y), 1, (0, 0, 255), -1)
+        velocity = abs(opening - prev_mouth_opening) if prev_mouth_opening else 0
+        mouth_velocities.append(velocity)
+        prev_mouth_opening = opening
 
-    # Update EAR values for plotting
-    ear_values.append(ear)
-    line.set_ydata(np.pad(ear_values, (100 - len(ear_values), 0), 'constant'))
-    
-    # Show Blink Count on Screen
-    cv2.putText(img, f"Blinks: {blink_count}", (10, 60), 
-                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
+        # Eyes
+        left_eye = dist(386, 374)
+        right_eye = dist(159, 145)
+        left_eye_dists.append(left_eye)
+        right_eye_dists.append(right_eye)
 
-    # Show Webcam Feed
-    cv2.imshow("Eye Blink Detection", img)
+        # Draw
+        for idx in [13, 14, 386, 374, 159, 145]:
+            cv2.circle(frame, to_xy(idx), 2, (0, 255, 0), -1)
 
-
-    # Stop if 'q' is pressed
+    cv2.imshow("Face Tracking", frame)
+    frame_idx += 1
     if cv2.waitKey(1) & 0xFF == ord('q'):
-        camera.release()
-        cv2.destroyAllWindows()
-        plt.close()
+        break
 
-    return line,
-
-# Use Matplotlib's Animation to Update Graph
-ani = animation.FuncAnimation(fig, update_graph, interval=50, blit=False)
-
-# Show Graph in Separate Window
-plt.show()
-
-# Cleanup
-camera.release()
+cap.release()
 cv2.destroyAllWindows()
