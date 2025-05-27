@@ -79,8 +79,15 @@ pip install -r requirements.txt
 
 ### Import libraries from dependecies.txt (if not added)
 ```python
-import mediapipe as mp 
 import cv2
-import matplotlib.pyplot as plt
 import numpy as np
+import mediapipe as mp
+import matplotlib.pyplot as plt
+from collections import deque
+from mediapipe.tasks.python import vision
+from mediapipe.tasks.python import BaseOptions
+from mediapipe.tasks.python.vision import GestureRecognizer, GestureRecognizerOptions
+import random
+import csv
+import time
 ```
