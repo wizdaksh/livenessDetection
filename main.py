@@ -22,9 +22,13 @@ gestureStringList = [
     "Closed_Fist",
 ]
 
-# --- Model paths ---
-face_model_path = r"src\models\face_landmarker.task"
-gesture_model_path = r"src\models\gesture_recognizer.task"
+# # --- Model paths (Windows path) ---
+# face_model_path = r"src\models\face_landmarker.task"
+# gesture_model_path = r"src\models\gesture_recognizer.task"
+
+# --- MacOS/Linux path ---
+face_model_path = "models/face_landmarker.task"
+gesture_model_path = "models/gesture_recognizer.task"
 
 # --- Load face landmark model ---
 face_options = vision.FaceLandmarkerOptions(
@@ -138,6 +142,7 @@ with open ("face_data.csv", mode='w', newline='') as file:
             left_eye_dists.append(left_eye)   # Store in deque
             right_eye_dists.append(right_eye) # Store in deque
 
+
             # Draw circles on selected landmarks for visualization
             for idx in [13, 14, 386, 374, 159, 145]:
                 cv2.circle(frame, to_xy(idx), 2, (0, 255, 0), -1)
@@ -169,10 +174,12 @@ with open ("face_data.csv", mode='w', newline='') as file:
                 cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
         cv2.putText(frame, validity_text, (10, 100),
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0) if validity else (0, 0, 255), 2)
-    
+
+
         #Check Eyelid Delta for Validity 
         if validity:
-            if left_eye < 1.9 and right_eye < 1.9:
+            #TODO: Check the ratio of max and min distances for eylids, should be less than 2.13
+            if left_eye < 2.1 and right_eye < 2.1:
                 cv2.putText(frame, "Eyelid Delta: Valid", (10, 130),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
             else:
