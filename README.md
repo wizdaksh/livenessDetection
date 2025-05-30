@@ -34,17 +34,17 @@ Enter command below in bash terminal
 
 ##### Create a virtual environment
 ```bash
-python -m venv myenv
+python -m venv .venv
 ```
 
 ##### Activate the environment
 ```bash
-myenv\Scripts\activate
+.venv\Scripts\activate
 ```
 
 ##### Install dependencies
 ```bash
-pip install -r requirements.txt
+pip install -r dependencies.txt
 ```
 
 
@@ -52,12 +52,12 @@ pip install -r requirements.txt
 
 ##### Create a virtual environment
 ```bash
-python3 -m venv myenv
+python3 -m venv .venv
 ```
 
 ##### Activate the environment
 ```bash
-source myenv/bin/activate
+source .venv/bin/activate
 ```
 
 ---
