@@ -2,14 +2,17 @@
 import cv2
 import numpy as np
 import mediapipe as mp
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 from collections import deque
 from mediapipe.tasks.python import vision
 from mediapipe.tasks.python import BaseOptions
 from mediapipe.tasks.python.vision import GestureRecognizer, GestureRecognizerOptions
 import random
+# from video import video_window
 # import csv
-# import time
+import time
+
+# video_window()
 
 # --- List of valid gestures ---
 gestureStringList = [
@@ -23,12 +26,12 @@ gestureStringList = [
 ]
 
 # # --- Model paths (Windows path) ---
-face_model_path = r"livenessDetection\models\face_landmarker.task"
-gesture_model_path = r"livenessDetection\models\gesture_recognizer.task"
+# face_model_path = r"livenessDetection\models\face_landmarker.task"
+# gesture_model_path = r"livenessDetection\models\gesture_recognizer.task"
 
 # --- MacOS/Linux path ---
-# face_model_path = "models/face_landmarker.task"
-# gesture_model_path = "models/gesture_recognizer.task"
+face_model_path = "livenessDetection/models/face_landmarker.task"
+gesture_model_path = "livenessDetection/models/gesture_recognizer.task"
 
 # --- Load face landmark model ---
 face_options = vision.FaceLandmarkerOptions(
@@ -47,8 +50,9 @@ gesture_options = GestureRecognizerOptions(
 )
 gesture_recognizer = GestureRecognizer.create_from_options(gesture_options)
 
+videoPath = 'output.avi'
 # --- Start webcam (DirectShow fixes MSMF error) ---
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(videoPath)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
@@ -56,24 +60,24 @@ if not cap.isOpened():
     print("[ERROR] Failed to open webcam. Exiting.")
     exit()
 
-# # --- Initialize graph object ---
-# plt.ion()
-# fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 6))
-# fig.tight_layout(pad=3)
+# --- Initialize graph object ---
+plt.ion()
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 6))
+fig.tight_layout(pad=3)
 
 # --- Plot face data ---
-# def plotFaceDeltas():
-    # ax1.clear()
-    # ax2.clear()
-    # ax1.set_title("Mouth Opening & Velocity")
-    # ax2.set_title("Eye Distance (Vertical)")
-    # ax1.plot(mouth_openings, label="Mouth Opening")
-    # ax1.plot(mouth_velocities, label="Velocity")
-    # ax1.legend(loc="upper right")
-    # ax2.plot(left_eye_dists, label="Left Eye")
-    # ax2.plot(right_eye_dists, label="Right Eye")
-    # ax2.legend(loc="upper right")
-    # plt.pause(0.001)
+def plotFaceDeltas():
+    ax1.clear()
+    ax2.clear()
+    ax1.set_title("Mouth Opening & Velocity")
+    ax2.set_title("Eye Distance (Vertical)")
+    ax1.plot(mouth_openings, label="Mouth Opening")
+    ax1.plot(mouth_velocities, label="Velocity")
+    ax1.legend(loc="upper right")
+    ax2.plot(left_eye_dists, label="Left Eye")
+    ax2.plot(right_eye_dists, label="Right Eye")
+    ax2.legend(loc="upper right")
+    plt.pause(0.001)
 
 # --- Buffers for live plots ---
 max_len = 100
@@ -90,7 +94,7 @@ gesture_result_text = "None"              # String: name of the detected gesture
 # --- Initialize valid gesture ---
 valid_gesture = random.choice(gestureStringList)  # String: randomly chosen valid gesture from list
 
-# start_time = time.perf_counter()  # Start time for performance measurement
+start_time = time.perf_counter()  # Start time for performance measurement
 
 
 # --- Lists for eylid and mouth pixel distance. Last in first out ---
@@ -110,8 +114,7 @@ while True:
         break
     
     # Convert OpenCV BGR image to RGB for MediaPipe
-    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_frame)
+    mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=frame)
 
     # --- Face landmarks ---
     face_result = face_landmarker.detect_for_video(mp_image, frame_idx * 33)
@@ -263,7 +266,7 @@ while True:
 
             
     # Plot Live Data of Eyelid Delta and Lip Delta Velocity
-    # plotFaceDeltas()  
+    plotFaceDeltas()  
     
     # Show frame
     cv2.imshow("Face + Gesture Tracking", frame)
@@ -275,5 +278,5 @@ while True:
 
 cap.release()
 cv2.destroyAllWindows()
-# plt.ioff()
-# plt.close()
+plt.ioff()
+plt.close()
